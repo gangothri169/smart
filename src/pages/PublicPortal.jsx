@@ -45,11 +45,17 @@ export default function PublicPortal() {
   });
   const [errors, setErrors] = useState({});
 
-  // Citizen's reports: incidents created manually or citizen reports
-  // Also show recent citizen-accessible reports
+  // Show all incidents in the public tracker so citizens can see city-wide status
   const myReports = incidents.filter(
-    i => i.detectionSource.includes('Citizen') || i.detectionSource.includes('Manual') || i.reportedBy === currentUser?.id
+    i =>
+      (i.detectionSource ?? '').includes('Civic Report') ||
+      (i.detectionSource ?? '').includes('Citizen') ||
+      (i.detectionSource ?? '').includes('Manual') ||
+      (i.detectionSource ?? '').includes('Field Inspector')
   );
+
+  // For city overview tab — all incidents visible to public
+  const allPublicIncidents = incidents;
 
   const totalResolved = incidents.filter(i => i.status === 'Resolved').length;
 
@@ -161,7 +167,7 @@ export default function PublicPortal() {
       {/* Tabs Bar */}
       <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.25rem' }}>
         {[
-          { id: 'my-reports', label: `My Complaints (${myReports.length})`, icon: Clock },
+          { id: 'my-reports', label: `City Reports (${allPublicIncidents.length})`, icon: Clock },
           { id: 'new-report', label: 'File Complaint', icon: PlusCircle },
           { id: 'overview', label: 'City Resolution Status', icon: Activity }
         ].map(tab => {
@@ -192,18 +198,18 @@ export default function PublicPortal() {
         })}
       </div>
 
-      {/* TAB 1: My Reports / Tracking */}
+      {/* TAB 1: City Reports / Tracking */}
       {activeTab === 'my-reports' && (
         <div className="card">
           <div className="card-header">
             <div>
-              <div className="card-title">Track Submitted Complaints</div>
-              <div className="card-subtitle">Real-time status updates from assigned municipal departments</div>
+              <div className="card-title">City Infrastructure Report Tracker</div>
+              <div className="card-subtitle">Browse all active and resolved civic issues — click any row to view full details</div>
             </div>
           </div>
 
           <div className="card-body" style={{ padding: 0 }}>
-            {myReports.length === 0 ? (
+            {allPublicIncidents.length === 0 ? (
               <div style={{ padding: '3.5rem 1rem', textAlign: 'center' }}>
                 <div
                   style={{
@@ -220,9 +226,9 @@ export default function PublicPortal() {
                 >
                   <FileText size={22} />
                 </div>
-                <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>No Complaints Logged Yet</h3>
+                <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>No Reports In System Yet</h3>
                 <p style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '0.25rem' }}>
-                  Notice a pothole, broken streetlight, or garbage overflow in your area? Report it to get it fixed.
+                  Notice a pothole, broken streetlight, or garbage overflow in your area? Be the first to report it.
                 </p>
                 <button
                   onClick={() => setActiveTab('new-report')}
@@ -230,7 +236,7 @@ export default function PublicPortal() {
                   style={{ marginTop: '1rem' }}
                 >
                   <PlusCircle size={14} />
-                  <span>Submit Your First Report</span>
+                  <span>File a Report</span>
                 </button>
               </div>
             ) : (
@@ -242,13 +248,13 @@ export default function PublicPortal() {
                       <th>Category</th>
                       <th>Issue & Location</th>
                       <th>Assigned Department</th>
-                      <th>Reported Time</th>
+                      <th>Reported Date</th>
                       <th>Status</th>
                       <th style={{ textAlign: 'right' }}>Track</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {myReports.map(inc => (
+                    {allPublicIncidents.map(inc => (
                       <tr
                         key={inc.id}
                         onClick={() => setActiveIncident(inc)}
